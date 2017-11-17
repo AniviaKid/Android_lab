@@ -34,6 +34,9 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
     public static List<GwentCard> opponent_dust=new ArrayList<>();//敌方墓地
     public static boolean enabled;//使用手牌使能，只有在我方回合才能使用手牌
     public static boolean enabled_resurrection;//复活使能，只有在该使能激活时才能触发墓地的点击事件
+    public static boolean enabled_decoy;//使用诱饵使能，只有在打出诱饵牌后激活使能
+    public static boolean is_my_round_end;//判断玩家回合是否结束，为true才能结束玩家回合
+    public GwentCard decoy;//初始化一张诱饵牌
     public boolean my_give_up;//我方是否放弃本轮
     public boolean opponent_give_up;//敌方是否放弃本轮
     public int turn;//为1表示我方行动，为-1表示敌方行动
@@ -42,7 +45,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
     public static GwentBoard board;//棋盘
 
     int img1[]={R.mipmap.decoy,R.mipmap.commander_horn,R.mipmap.blue_stripes_commando,R.mipmap.crinfrid_reavers_dragon_hunter,R.mipmap.catapult,R.mipmap.thaler,R.mipmap.mysterious_elf,R.mipmap.dijkstra,R.mipmap.prince_stennis,R.mipmap.geralt,R.mipmap.yennefer,R.mipmap.villentretenmerth,R.mipmap.ciri,R.mipmap.dun_banner_medic,R.mipmap.esterad_thyssen,R.mipmap.john_natalis,R.mipmap.philippa_eilhart,R.mipmap.vernon_roche};
-    int img2[]={R.mipmap.decoy,R.mipmap.commander_horn,R.mipmap.arachas_behemoth,R.mipmap.arachas,R.mipmap.vampire_ekimmara,R.mipmap.vampire_fleder,R.mipmap.vampire_garkain,R.mipmap.vampire_bruxa,R.mipmap.vampire_katakan,R.mipmap.crone_brewess,R.mipmap.crone_weavess,R.mipmap.crone_whispess,R.mipmap.draug,R.mipmap.kayran,R.mipmap.earth_elemental,R.mipmap.imlerith,R.mipmap.leshen,R.mipmap.triss_merigold,R.mipmap.yennefer,R.mipmap.geralt,R.mipmap.ciri,R.mipmap.villentretenmerth,R.mipmap.mysterious_elf};
+    int img2[]={R.mipmap.decoy,R.mipmap.commander_horn,R.mipmap.arachas_behemoth,R.mipmap.arachas,R.mipmap.vampire_ekimmara,R.mipmap.vampire_fleder,R.mipmap.vampire_garkain,R.mipmap.vampire_bruxa,R.mipmap.vampire_katakan,R.mipmap.crone_brewess,R.mipmap.crone_weavess,R.mipmap.crone_whispess,R.mipmap.draug,R.mipmap.vesemir,R.mipmap.earth_elemental,R.mipmap.imlerith,R.mipmap.leshen,R.mipmap.triss_merigold,R.mipmap.yennefer,R.mipmap.geralt,R.mipmap.ciri,R.mipmap.villentretenmerth,R.mipmap.mysterious_elf};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,19 +61,42 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
 
 
         Init_library();
+        for(int i=0;i<my_library.size();i++){
+            if(my_library.get(i).getType().equals("decoy")){
+                decoy=new GwentCard(my_library.get(i).getImg(),my_library.get(i).getPower(),my_library.get(i).getType(),my_library.get(i).getisHero(),my_library.get(i).getCol(),my_library.get(i).getId(),my_library.get(i).getName());
+                break;
+            }
+        }
         Init_parameter();
         board=new GwentBoard(this);
         Init_RecyclerView(board);
         Init_hand();
-        enabled=true;
         turn=1;
-        for(int i=0;i<5;i++){
-            my_dust.add(my_library.get(i));
-            my_library.remove(i);
-        }
+        enabled=true;
+        /*while(my_life!=0&&opponent_life!=0){
+            if(turn==1){ //我方行动
+                Toast.makeText(MainActivityGame.this,"我方行动",Toast.LENGTH_SHORT).show();
+                enabled=true;
+                while (!is_my_round_end){
+
+                }
+                turn*=-1;
+            }
+            else if(turn==-1){ //敌方行动
+                is_my_round_end=false;
+                for(int i=0;i<opponent_hand.size();i++){
+                    if(opponent_hand.get(i).getType().equals("human")||opponent_hand.get(i).getType().equals("set")){
+                        Use_Card(board,opponent_hand.get(i));
+                    }
+                }
+                turn*=-1;
+            }
+        }*/
         for(int i=0;i<opponent_hand.size();i++){
-            if(opponent_hand.get(i).getType().equals("commander_horn")) ;
-            else Use_Card(board,opponent_hand.get(i));
+            if(opponent_hand.get(i).getType().equals("set")){
+                Use_Card(board,opponent_hand.get(i));;
+                break;
+            }
         }
         /*while (1){
             if(turn==1){
@@ -81,9 +107,8 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 Toast.makeText(MainActivityGame.this,"敌方行动",Toast.LENGTH_SHORT).show();
             }
         }*/
-
-
     }
+
     public void Init_library(){ //初始化卡组
         InputStream inputStream1=getResources().openRawResource(R.raw.northern_area);//初始化我方卡组
         try {
@@ -195,8 +220,10 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
     public void Init_parameter(){
         enabled=false;
         enabled_resurrection=false;
+        enabled_decoy=false;
         my_give_up=false;
         opponent_give_up=false;
+        is_my_round_end=false;
         my_life=2;
         opponent_life=2;
         Random random=new Random();
@@ -205,7 +232,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
         else turn=-1;
     }
 
-    public void Init_RecyclerView(GwentBoard board){ //初始化board的RecyclerView
+    public void Init_RecyclerView(final GwentBoard board){ //初始化board的RecyclerView
         LinearLayoutManager linearLayoutManager1=new LinearLayoutManager(this);
         linearLayoutManager1.setOrientation(LinearLayoutManager.HORIZONTAL);//设置每个View横向布置
         board.opponent_third=(RecyclerView) findViewById(R.id.opponent_third);
@@ -228,18 +255,57 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
         linearLayoutManager4.setOrientation(LinearLayoutManager.HORIZONTAL);
         board.my_first=(RecyclerView) findViewById(R.id.my_first);
         board.my_first.setLayoutManager(linearLayoutManager4);
+        board.my_first_adapter.setItemClickListener(new RecyclerAdapter.OnItemClickListener() {
+            @Override
+            public void OnClick(View v, int position) {
+                if(enabled_decoy){
+                    my_hand.add(board.my_first_list.get(position));
+                    board.my_first_list.remove(position);
+                    board.my_first_list.add(decoy);
+                    enabled_decoy=false;
+                    board.Update();//更新数据适配器和每行的TextView
+                    Update_Textview(board);
+                }
+            }
+        });
         board.my_first.setAdapter(board.my_first_adapter);
 
         LinearLayoutManager linearLayoutManager5=new LinearLayoutManager(this);
         linearLayoutManager5.setOrientation(LinearLayoutManager.HORIZONTAL);
         board.my_second=(RecyclerView) findViewById(R.id.my_second);
         board.my_second.setLayoutManager(linearLayoutManager5);
+        board.my_second_adapter.setItemClickListener(new RecyclerAdapter.OnItemClickListener() {
+            @Override
+            public void OnClick(View v, int position) {
+                if(enabled_decoy){
+                    my_hand.add(board.my_second_list.get(position));
+                    board.my_second_list.remove(position);
+                    board.my_second_list.add(decoy);
+                    enabled_decoy=false;
+                    board.Update();//更新数据适配器和每行的TextView
+                    Update_Textview(board);
+                }
+            }
+        });
         board.my_second.setAdapter(board.my_second_adapter);
 
         LinearLayoutManager linearLayoutManager6=new LinearLayoutManager(this);
         linearLayoutManager6.setOrientation(LinearLayoutManager.HORIZONTAL);
         board.my_third=(RecyclerView) findViewById(R.id.my_third);
         board.my_third.setLayoutManager(linearLayoutManager6);
+        board.my_third_adapter.setItemClickListener(new RecyclerAdapter.OnItemClickListener() {
+            @Override
+            public void OnClick(View v, int position) {
+                if(enabled_decoy){
+                    my_hand.add(board.my_third_list.get(position));
+                    board.my_third_list.remove(position);
+                    board.my_third_list.add(decoy);
+                    enabled_decoy=false;
+                    board.Update();//更新数据适配器和每行的TextView
+                    Update_Textview(board);
+                }
+            }
+        });
         board.my_third.setAdapter(board.my_third_adapter);
     }
     public static String getString(InputStream inputStream) throws IOException { //读取文件转为String
@@ -309,6 +375,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 if(num!=1) Toast.makeText(MainActivityGame.this,card.getName()+"发动同袍之情，点数倍增",Toast.LENGTH_SHORT).show();
                 for(int i=0;i<board.my_first_list.size();i++){
                     if(board.my_first_list.get(i).getType().equals("friends")&&board.my_first_list.get(i).getId()==card.getId()) board.my_first_list.get(i).now_power=board.my_first_list.get(i).getPower()*num;
+                    if(board.my_first_list.get(i).isDouble) board.my_first_list.get(i).now_power*=2;
                 }
             }
             else if(card.getCol()==2){
@@ -319,6 +386,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 if(num!=1) Toast.makeText(MainActivityGame.this,card.getName()+"发动同袍之情，点数倍增",Toast.LENGTH_SHORT).show();
                 for(int i=0;i<board.my_second_list.size();i++){
                     if(board.my_second_list.get(i).getType().equals("friends")&&board.my_second_list.get(i).getId()==card.getId()) board.my_second_list.get(i).now_power=board.my_second_list.get(i).getPower()*num;
+                    if(board.my_second_list.get(i).isDouble) board.my_second_list.get(i).now_power*=2;
                 }
             }
             else if(card.getCol()==3){
@@ -329,6 +397,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 if(num!=1) Toast.makeText(MainActivityGame.this,card.getName()+"发动同袍之情，点数倍增",Toast.LENGTH_SHORT).show();
                 for(int i=0;i<board.my_third_list.size();i++){
                     if(board.my_third_list.get(i).getType().equals("friends")&&board.my_third_list.get(i).getId()==card.getId()) board.my_third_list.get(i).now_power=board.my_third_list.get(i).getPower()*num;
+                    if(board.my_third_list.get(i).isDouble) board.my_third_list.get(i).now_power*=2;
                 }
             }
         }
@@ -357,10 +426,13 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
         else if (card.getType().equals("doctor")){
             if(card.getCol()>0){
                 board.AddCard(card.getCol(),card);
-                enabled_resurrection=true;//复活使能置true
-                enabled=false;//出牌使能置false
-                Toast.makeText(MainActivityGame.this,"请从墓地中选择需要复活的卡",Toast.LENGTH_SHORT).show();
-                startActivity(new Intent("android.intent.action.Hand_and_Dust"));
+                if(my_dust.size()!=0){
+                    enabled_resurrection=true;//复活使能置true
+                    enabled=false;//出牌使能置false
+                    Toast.makeText(MainActivityGame.this,"请从墓地中选择需要复活的卡",Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent("android.intent.action.Hand_and_Dust"));
+                }
+
             }
             else { //电脑使用医生卡，计划是优先复活间谍，其次复活点数最高的卡
 
@@ -377,15 +449,56 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                     Toast.makeText(MainActivityGame.this,"火灼发动",Toast.LENGTH_SHORT).show();
                     for(int i=0;i<board.oppeonent_first_list.size();i++){
                         if(board.oppeonent_first_list.get(i).now_power==max_power&&!board.oppeonent_first_list.get(i).getisHero()){
+                            opponent_dust.add(board.oppeonent_first_list.get(i));
                             board.oppeonent_first_list.remove(i);
                             i--;
                         }
                     }
                 }
             }
+            else{ //敌方使用三寒鸦
+                if(board.my_first_power>=10){
+                    int max_power=0;
+                    for(int i=0;i<board.my_first_list.size();i++){
+                        if(board.my_first_list.get(i).now_power>max_power&&!board.my_first_list.get(i).getisHero()) max_power=board.my_first_list.get(i).now_power;
+                    }
+                    Toast.makeText(MainActivityGame.this,"火灼发动",Toast.LENGTH_SHORT).show();
+                    for(int i=0;i<board.my_first_list.size();i++){
+                        if(board.my_first_list.get(i).now_power==max_power&&!board.my_first_list.get(i).getisHero()) {
+                            my_dust.add(board.my_first_list.get(i));
+                            board.my_first_list.remove(i);
+                            i--;
+                        }
+                    }
+                }
+            }
         }
-        /*else if(card.getType().equals("commander_horn")){
-            if(turn==1){ //我方行动
+        else if(card.getType().equals("set")){
+            int id=card.getId();
+            for(int i=0;i<opponent_hand.size();i++){
+                if(opponent_hand.get(i).getId()==id){
+                    board.AddCard(opponent_hand.get(i).getCol(),opponent_hand.get(i));
+                    opponent_hand.remove(i);
+                    i--;
+                }
+            }
+            for(int i=0;i<opponent_library.size();i++){
+                if(opponent_library.get(i).getId()==id){
+                    board.AddCard(opponent_library.get(i).getCol(),opponent_library.get(i));
+                    opponent_library.remove(i);
+                    i--;
+                }
+            }
+            Toast.makeText(MainActivityGame.this,card.getName()+"发动集群特效，召唤同类",Toast.LENGTH_SHORT).show();
+        }
+        else if(card.getType().equals("decoy")){
+            if(card.getCol()>0){ //我方使用诱饵
+                enabled_decoy=true;
+                Toast.makeText(MainActivityGame.this,"请选择需要替换的卡",Toast.LENGTH_SHORT).show();
+            }
+        }
+        else if(card.getType().equals("commander_horn")){
+            if(card.getCol()>0){ //我方行动
                 AlertDialog.Builder talk=new AlertDialog.Builder(MainActivityGame.this);
                 talk.setTitle("请选择领导号角放置的位置");
                 String[] items=new String[]{"近战列","远程列","攻城列"};
@@ -443,6 +556,8 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                                 my_hand.add(card);
                             }
                         }
+                        board.Update();//更新数据适配器和每行的TextView
+                        Update_Textview(board);
                     }
                 });
                 talk.show();
@@ -458,6 +573,8 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                     }
                     Toast.makeText(MainActivityGame.this,"敌方近战列点数翻倍",Toast.LENGTH_SHORT).show();
                     board.opponent_first_special_card=true;
+                    board.Update();//更新数据适配器和每行的TextView
+                    Update_Textview(board);
                 }
                 else if(!board.opponent_second_special_card){
                     board.AddCard(-2,card);
@@ -469,6 +586,8 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                     }
                     Toast.makeText(MainActivityGame.this,"敌方远程列点数翻倍",Toast.LENGTH_SHORT).show();
                     board.opponent_second_special_card=true;
+                    board.Update();//更新数据适配器和每行的TextView
+                    Update_Textview(board);
                 }
                 else if(!board.opponent_third_special_card){
                     board.AddCard(-3,card);
@@ -480,9 +599,11 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                     }
                     Toast.makeText(MainActivityGame.this,"敌方远程列点数翻倍",Toast.LENGTH_SHORT).show();
                     board.opponent_third_special_card=true;
+                    board.Update();//更新数据适配器和每行的TextView
+                    Update_Textview(board);
                 }
             }
-        }*/
+        }
         board.Update();//更新数据适配器和每行的TextView
         Update_Textview(board);
     }
@@ -520,6 +641,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 Use_Card(board,my_dust.get(pos));
                 my_dust.remove(pos);
             }
+            is_my_round_end=true;
         }
     };
 }
