@@ -103,9 +103,41 @@ public class GwentBoard {
             this.opponent_third_adapter.notifyDataSetChanged();
         }
     }
+    public void clear(){
+        for(int i=0;i<my_first_list.size();i++){
+            MainActivityGame.my_dust.add(my_first_list.get(i));
+        }
+        this.my_first_list.clear();
+        for(int i=0;i<my_second_list.size();i++){
+            MainActivityGame.my_dust.add(my_second_list.get(i));
+        }
+        this.my_second_list.clear();
+        for(int i=0;i<my_third_list.size();i++){
+            MainActivityGame.my_dust.add(my_third_list.get(i));
+        }
+        this.my_third_list.clear();
+        for(int i=0;i<oppeonent_first_list.size();i++){
+            MainActivityGame.opponent_dust.add(oppeonent_first_list.get(i));
+        }
+        this.oppeonent_first_list.clear();
+        for(int i=0;i<opponent_second_list.size();i++){
+            MainActivityGame.opponent_dust.add(opponent_second_list.get(i));
+        }
+        this.opponent_second_list.clear();
+        for(int i=0;i<opponent_third_list.size();i++){
+            MainActivityGame.opponent_dust.add(opponent_third_list.get(i));
+        }
+        this.opponent_third_list.clear();
+        this.my_first_adapter.notifyDataSetChanged();
+        this.my_second_adapter.notifyDataSetChanged();
+        this.my_third_adapter.notifyDataSetChanged();
+        this.opponent_first_adapter.notifyDataSetChanged();
+        this.opponent_second_adapter.notifyDataSetChanged();
+        this.opponent_third_adapter.notifyDataSetChanged();
+    }
    public void Update(){
        //根据号角更新
-       /*if(my_first_special_card){
+       if(my_first_special_card){
            for(int i=0;i<my_first_list.size();i++){
                if(!my_first_list.get(i).getisHero()&&!my_first_list.get(i).isDouble){
                    my_first_list.get(i).now_power*=2;
@@ -152,7 +184,7 @@ public class GwentBoard {
                    opponent_third_list.get(i).isDouble=true;
                }
            }
-       }*/
+       }
 
        this.my_first_power=0;
        this.my_second_power=0;

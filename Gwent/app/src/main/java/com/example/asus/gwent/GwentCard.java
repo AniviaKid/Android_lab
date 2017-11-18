@@ -38,4 +38,7 @@ public class GwentCard {
     public int getCol(){return this.col;}
     public int getId(){return this.id;}
     public String getName(){return this.name;}
+    public void setCol(int col){
+        this.col=col;
+    }
 }

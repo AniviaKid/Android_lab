@@ -12,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.BounceInterpolator;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -58,6 +59,15 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
         intentFilter.addAction("use_card");
         intentFilter.addAction("resave_card");
         registerReceiver(mBroadcastReceiver,intentFilter);
+        IntentFilter intentFilter1=new IntentFilter();
+        intentFilter1.addAction("my_game_begin");
+        intentFilter1.addAction("opponent_game_begin");
+        registerReceiver(mBroadcastReceiver1,intentFilter1);
+        IntentFilter intentFilter2=new IntentFilter();
+        intentFilter2.addAction("my_game_end");
+        intentFilter2.addAction("opponent_game_end");
+        registerReceiver(mBroadcastReceiver2,intentFilter2);
+
 
 
         Init_library();
@@ -71,42 +81,10 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
         board=new GwentBoard(this);
         Init_RecyclerView(board);
         Init_hand();
-        turn=1;
-        enabled=true;
-        /*while(my_life!=0&&opponent_life!=0){
-            if(turn==1){ //我方行动
-                Toast.makeText(MainActivityGame.this,"我方行动",Toast.LENGTH_SHORT).show();
-                enabled=true;
-                while (!is_my_round_end){
-
-                }
-                turn*=-1;
-            }
-            else if(turn==-1){ //敌方行动
-                is_my_round_end=false;
-                for(int i=0;i<opponent_hand.size();i++){
-                    if(opponent_hand.get(i).getType().equals("human")||opponent_hand.get(i).getType().equals("set")){
-                        Use_Card(board,opponent_hand.get(i));
-                    }
-                }
-                turn*=-1;
-            }
-        }*/
-        for(int i=0;i<opponent_hand.size();i++){
-            if(opponent_hand.get(i).getType().equals("set")){
-                Use_Card(board,opponent_hand.get(i));;
-                break;
-            }
-        }
-        /*while (1){
-            if(turn==1){
-                Toast.makeText(MainActivityGame.this,"我方行动",Toast.LENGTH_SHORT).show();
-                startActivity(new Intent("android.intent.action.Hand_and_Dust"));
-            }
-            else{
-                Toast.makeText(MainActivityGame.this,"敌方行动",Toast.LENGTH_SHORT).show();
-            }
-        }*/
+        /*turn=1;
+        enabled=true;*/
+        if(turn==1) sendBroadcast(new Intent("my_game_begin"));
+        else sendBroadcast(new Intent("opponent_game_begin"));
     }
 
     public void Init_library(){ //初始化卡组
@@ -227,7 +205,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
         my_life=2;
         opponent_life=2;
         Random random=new Random();
-        int tmp=random.nextInt(10);
+        int tmp=random.nextInt();
         if(tmp%2==0) turn=1;
         else turn=-1;
     }
@@ -619,8 +597,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
     @Override
     public boolean onLongClick(View v) {
         if(v.getId()==R.id.give_up){
-            my_give_up=true;
-            Toast.makeText(MainActivityGame.this,"放弃",Toast.LENGTH_SHORT).show();
+            sendBroadcast(new Intent("my_game_end"));
         }
         return false;
     }
@@ -634,14 +611,290 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 int pos=bundle.getInt("pos");
                 Use_Card(board,my_hand.get(pos));
                 my_hand.remove(pos);
+                if(!opponent_give_up) sendBroadcast(new Intent("opponent_game_begin"));
+                else sendBroadcast(new Intent("my_game_begin"));
+                turn*=-1;
             }
             else if(action.equals("resave_card")){
                 Bundle bundle=intent.getExtras();
                 int pos=bundle.getInt("pos");
+                if(my_dust.get(pos).getType().equals("spy")) my_dust.get(pos).setCol(my_dust.get(pos).getCol()*(-1));
                 Use_Card(board,my_dust.get(pos));
                 my_dust.remove(pos);
+                if(!opponent_give_up) sendBroadcast(new Intent("opponent_game_begin"));
+                else sendBroadcast(new Intent("my_game_begin"));
+                turn*=-1;
             }
             is_my_round_end=true;
         }
     };
+    private  BroadcastReceiver mBroadcastReceiver1=new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action=intent.getAction();
+            if(action.equals("my_game_begin")){
+                enabled=true;
+                Toast.makeText(MainActivityGame.this,"我方行动",Toast.LENGTH_SHORT).show();
+            }
+            else if(action.equals("opponent_game_begin")){
+                if(my_give_up&&board.opponent_first_power+board.opponent_second_power+board.opponent_third_power>board.my_first_power+board.my_second_power+board.my_third_power){
+                    sendBroadcast(new Intent("opponent_game_end"));
+                }
+                else if(board.opponent_first_power+board.opponent_second_power+board.opponent_third_power>board.my_first_power+board.my_second_power+board.my_third_power+35){
+                    sendBroadcast(new Intent("opponent_game_end"));
+                }
+                else {
+                    int delay=2000000;
+                    while(delay>=0) delay--;
+                    boolean isUseCard=false;
+                    for(int i=0;i<opponent_hand.size();i++){
+                        if(opponent_hand.get(i).getType().equals("spy")){
+                            Toast.makeText(MainActivityGame.this,"敌方使用"+opponent_hand.get(i).getName(),Toast.LENGTH_SHORT).show();
+                            Use_Card(board,opponent_hand.get(i));
+                            opponent_hand.remove(i);
+                            isUseCard=true;
+                            break;
+                        }
+                        else if(opponent_hand.get(i).getType().equals("decoy")&&isSpyExist()!=-999){
+                            Toast.makeText(MainActivityGame.this,"敌方使用诱饵替换间谍",Toast.LENGTH_SHORT).show();
+                            opponent_hand.remove(i);
+                            if(isSpyExist()==-1){
+                                for(int j=0;j<board.oppeonent_first_list.size();j++){
+                                    if(board.oppeonent_first_list.get(j).getType().equals("spy")&&!board.oppeonent_first_list.get(j).getisHero()){
+                                        board.oppeonent_first_list.get(j).setCol(board.oppeonent_first_list.get(j).getCol()*(-1));
+                                        opponent_hand.add(board.oppeonent_first_list.get(j));
+                                        board.oppeonent_first_list.remove(j);
+                                        board.oppeonent_first_list.add(decoy);
+                                        break;
+                                    }
+                                }
+                            }
+                            else{
+                                for(int j=0;j<board.opponent_third_list.size();j++){
+                                    if(board.opponent_third_list.get(j).getType().equals("spy")&&!board.opponent_third_list.get(j).getisHero()){
+                                        board.opponent_third_list.get(j).setCol(board.opponent_third_list.get(j).getCol()*(-1));
+                                        opponent_hand.add(board.opponent_third_list.get(j));
+                                        board.opponent_third_list.remove(j);
+                                        board.opponent_third_list.add(decoy);
+                                        break;
+                                    }
+                                }
+                            }
+                            isUseCard=true;
+                            break;
+                        }
+                        else if(opponent_hand.get(i).getType().equals("doctor")&&opponent_dust.size()>=6){
+                            board.AddCard(-2,opponent_hand.get(i));
+                            opponent_hand.remove(i);
+                            boolean flag=false;
+                            for(int j=0;j<opponent_dust.size();j++){
+                                if(opponent_dust.get(j).getType().equals("spy")){
+                                    opponent_dust.get(j).setCol(opponent_dust.get(j).getCol()*(-1));
+                                    Use_Card(board,opponent_dust.get(j));
+                                    opponent_dust.remove(j);
+                                    flag=true;
+                                }
+                            }
+                            if(!flag){
+                                int max=0;
+                                for(int j=0;j<opponent_dust.size();j++){
+                                    if(opponent_dust.get(j).getPower()>max&&!opponent_dust.get(j).getisHero()){
+                                        max=opponent_dust.get(j).getPower();
+                                    }
+                                }
+                                for(int j=0;j<opponent_dust.size();j++){
+                                    if(opponent_dust.get(j).getPower()==max&&!opponent_dust.get(j).getisHero()){
+                                        board.AddCard(opponent_dust.get(j).getCol(),opponent_dust.get(j));
+                                        break;
+                                    }
+                                }
+                            }
+                            isUseCard=true;
+                            break;
+                        }
+                        else if(opponent_hand.get(i).getType().equals("fire")&&board.my_first_power>=30){
+                            Use_Card(board,opponent_hand.get(i));
+                            opponent_hand.remove(i);
+                            isUseCard=true;
+                            break;
+                        }
+                        else if(opponent_hand.get(i).getType().equals("human")||opponent_hand.get(i).getType().equals("commander_horn")){
+                            Use_Card(board,opponent_hand.get(i));
+                            opponent_hand.remove(i);
+                            isUseCard=true;
+                            break;
+                        }
+                        else if(opponent_hand.get(i).getType().equals("set")){
+                            Use_Card(board,opponent_hand.get(i));
+                            isUseCard=true;
+                            break;
+                        }
+                    }
+                    turn*=-1;
+                    if(!isUseCard) sendBroadcast(new Intent("opponent_game_end"));
+                    else {
+                        if(!my_give_up) sendBroadcast(new Intent("my_game_begin"));
+                        else sendBroadcast(new Intent("opponent_game_begin"));
+                    }
+                }
+            }
+        }
+    };
+    private BroadcastReceiver mBroadcastReceiver2=new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action=intent.getAction();
+            if(action.equals("my_game_end")){
+                my_give_up=true;
+                enabled=false;
+                Toast.makeText(MainActivityGame.this,"我方放弃本轮",Toast.LENGTH_SHORT).show();
+                if(opponent_give_up){
+                    int my_power_num=board.my_first_power+board.my_second_power+board.my_third_power;
+                    int opponent_power_num=board.opponent_first_power+board.opponent_second_power+board.opponent_third_power;
+                    enabled=false;
+                    enabled_resurrection=false;
+                    enabled_decoy=false;
+                    my_give_up=false;
+                    opponent_give_up=false;
+                    is_my_round_end=false;
+                    if(my_power_num>opponent_power_num){ //我方获胜
+                        Toast.makeText(MainActivityGame.this,"本轮我方获胜",Toast.LENGTH_SHORT);
+                        opponent_life--;
+                        if(opponent_life==0){
+                            AlertDialog.Builder talk=new AlertDialog.Builder(MainActivityGame.this);
+                            talk.setTitle("玩家胜出!");
+                            talk.show();
+                        }
+                        else{
+                            board.clear();
+                            board.Update();
+                            Update_Textview(board);
+                            sendBroadcast(new Intent("my_game_begin"));
+                        }
+                    }
+                    else if(my_power_num==opponent_power_num){
+                        Toast.makeText(MainActivityGame.this,"本轮平局",Toast.LENGTH_SHORT);
+                        my_life--;
+                        opponent_life--;
+                        if(opponent_life==0){
+                            AlertDialog.Builder talk=new AlertDialog.Builder(MainActivityGame.this);
+                            talk.setTitle("玩家胜出!");
+                            talk.show();
+                        }
+                        else if(my_life==0){
+                            AlertDialog.Builder talk=new AlertDialog.Builder(MainActivityGame.this);
+                            talk.setTitle("对手胜出!");
+                            talk.show();
+                        }
+                        else {
+                            board.clear();
+                            board.Update();
+                            Update_Textview(board);
+                            sendBroadcast(new Intent("my_game_begin"));
+                        }
+                    }
+                    else {
+                        Toast.makeText(MainActivityGame.this,"本轮敌方获胜",Toast.LENGTH_SHORT);
+                        my_life--;
+                        if(my_life==0){
+                            AlertDialog.Builder talk=new AlertDialog.Builder(MainActivityGame.this);
+                            talk.setTitle("对手胜出!");
+                            talk.show();
+                        }
+                        else{
+                            board.clear();
+                            board.Update();
+                            Update_Textview(board);
+                            sendBroadcast(new Intent("opponent_game_begin"));
+                        }
+                    }
+                }
+                else{
+                    Toast.makeText(MainActivityGame.this,"test",Toast.LENGTH_SHORT);
+                    sendBroadcast(new Intent("opponent_game_begin"));
+                }
+            }
+            else if(action.equals("opponent_game_end")){
+                opponent_give_up=true;
+                Toast.makeText(MainActivityGame.this,"敌方放弃本轮",Toast.LENGTH_SHORT).show();
+                if(my_give_up){
+                    int my_power_num=board.my_first_power+board.my_second_power+board.my_third_power;
+                    int opponent_power_num=board.opponent_first_power+board.opponent_second_power+board.opponent_third_power;
+                    enabled=false;
+                    enabled_resurrection=false;
+                    enabled_decoy=false;
+                    my_give_up=false;
+                    opponent_give_up=false;
+                    is_my_round_end=false;
+                    if(my_power_num>opponent_power_num){ //我方获胜
+                        Toast.makeText(MainActivityGame.this,"本轮我方获胜",Toast.LENGTH_SHORT);
+                        opponent_life--;
+                        if(opponent_life==0){
+                            AlertDialog.Builder talk=new AlertDialog.Builder(MainActivityGame.this);
+                            talk.setTitle("玩家胜出!");
+                            talk.show();
+                        }
+                        else{
+                            board.clear();
+                            board.Update();
+                            Update_Textview(board);
+                            sendBroadcast(new Intent("my_game_begin"));
+                        }
+                    }
+                    else if(my_power_num==opponent_power_num){
+                        Toast.makeText(MainActivityGame.this,"本轮平局",Toast.LENGTH_SHORT);
+                        my_life--;
+                        opponent_life--;
+                        if(opponent_life==0){
+                            AlertDialog.Builder talk=new AlertDialog.Builder(MainActivityGame.this);
+                            talk.setTitle("玩家胜出!");
+                            talk.show();
+                        }
+                        else if(my_life==0){
+                            AlertDialog.Builder talk=new AlertDialog.Builder(MainActivityGame.this);
+                            talk.setTitle("对手胜出!");
+                            talk.show();
+                        }
+                        else {
+                            board.clear();
+                            board.Update();
+                            Update_Textview(board);
+                            sendBroadcast(new Intent("my_game_begin"));
+                        }
+                    }
+                    else {
+                        Toast.makeText(MainActivityGame.this,"本轮敌方获胜",Toast.LENGTH_SHORT);
+                        my_life--;
+                        if(my_life==0){
+                            AlertDialog.Builder talk=new AlertDialog.Builder(MainActivityGame.this);
+                            talk.setTitle("对手胜出!");
+                            talk.show();
+                        }
+                        else{
+                            board.clear();
+                            board.Update();
+                            Update_Textview(board);
+                            sendBroadcast(new Intent("opponent_game_begin"));
+                        }
+                    }
+                }
+                else{
+                    sendBroadcast(new Intent("my_game_begin"));
+                }
+            }
+        }
+    };
+    public int isSpyExist(){ //存在间谍则返回列数，否则返回-999
+        for(int i=0;i<board.oppeonent_first_list.size();i++){
+            if(board.oppeonent_first_list.get(i).getType().equals("spy")&&!board.oppeonent_first_list.get(i).getisHero()){
+                return -1;
+            }
+        }
+        for(int i=0;i<board.opponent_third_list.size();i++){
+            if(board.opponent_third_list.get(i).getType().equals("spy")&&!board.opponent_third_list.get(i).getisHero()){
+                return -3;
+            }
+        }
+        return -999;
+    }
 }
