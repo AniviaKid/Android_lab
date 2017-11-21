@@ -22,6 +22,7 @@ public class Hand_and_Dust extends AppCompatActivity implements View.OnClickList
     RecyclerAdapter dust_adapter;
     public RecyclerView Hand;
     RecyclerAdapter hand_adapter;
+    public static Hand_and_Dust instance=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -31,7 +32,7 @@ public class Hand_and_Dust extends AppCompatActivity implements View.OnClickList
         Init_RecyclerView();
         Update();
         findViewById(R.id.back).setOnClickListener(this);
-
+        instance=this;
     }
 
     public void Init_RecyclerView(){

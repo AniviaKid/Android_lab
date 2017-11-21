@@ -120,6 +120,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 //Log.i("type",type);
                 j++;
                 isHero=information[i].charAt(j)=='1' ? true : false;
+                Log.i("ishero",isHero+"");
                 j+=2;
                 col=information[i].charAt(j)-'0';
                 //Log.i("col",""+col);
@@ -237,7 +238,9 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
             @Override
             public void OnClick(View v, int position) {
                 if(enabled_decoy){
-                    my_hand.add(board.my_first_list.get(position));
+                    GwentCard tmp=board.my_first_list.get(position);
+                    if(tmp.getCol()<0) tmp.setCol(tmp.getCol()*(-1));
+                    my_hand.add(tmp);
                     board.my_first_list.remove(position);
                     board.my_first_list.add(decoy);
                     enabled_decoy=false;
@@ -256,7 +259,9 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
             @Override
             public void OnClick(View v, int position) {
                 if(enabled_decoy){
-                    my_hand.add(board.my_second_list.get(position));
+                    GwentCard tmp=board.my_second_list.get(position);
+                    if(tmp.getCol()<0) tmp.setCol(tmp.getCol()*(-1));
+                    my_hand.add(tmp);
                     board.my_second_list.remove(position);
                     board.my_second_list.add(decoy);
                     enabled_decoy=false;
@@ -275,7 +280,9 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
             @Override
             public void OnClick(View v, int position) {
                 if(enabled_decoy){
-                    my_hand.add(board.my_third_list.get(position));
+                    GwentCard tmp=board.my_third_list.get(position);
+                    if(tmp.getCol()<0) tmp.setCol(tmp.getCol()*(-1));
+                    my_hand.add(tmp);
                     board.my_third_list.remove(position);
                     board.my_third_list.add(decoy);
                     enabled_decoy=false;
@@ -637,98 +644,144 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 Toast.makeText(MainActivityGame.this,"我方行动",Toast.LENGTH_SHORT).show();
             }
             else if(action.equals("opponent_game_begin")){
-                if(my_give_up&&board.opponent_first_power+board.opponent_second_power+board.opponent_third_power>board.my_first_power+board.my_second_power+board.my_third_power){
+                if(opponent_life>1&&my_give_up&&board.opponent_first_power+board.opponent_second_power+board.opponent_third_power>board.my_first_power+board.my_second_power+board.my_third_power){
                     sendBroadcast(new Intent("opponent_game_end"));
                 }
-                else if(board.opponent_first_power+board.opponent_second_power+board.opponent_third_power>board.my_first_power+board.my_second_power+board.my_third_power+35){
+                else if(opponent_life>1&&board.opponent_first_power+board.opponent_second_power+board.opponent_third_power>board.my_first_power+board.my_second_power+board.my_third_power+35){
                     sendBroadcast(new Intent("opponent_game_end"));
                 }
                 else {
-                    int delay=2000000;
-                    while(delay>=0) delay--;
                     boolean isUseCard=false;
-                    for(int i=0;i<opponent_hand.size();i++){
-                        if(opponent_hand.get(i).getType().equals("spy")){
-                            Toast.makeText(MainActivityGame.this,"敌方使用"+opponent_hand.get(i).getName(),Toast.LENGTH_SHORT).show();
-                            Use_Card(board,opponent_hand.get(i));
-                            opponent_hand.remove(i);
-                            isUseCard=true;
-                            break;
+                    while(true){
+                        for(int i=0;i<opponent_hand.size();i++){
+                            if(opponent_hand.get(i).getType().equals("spy")){
+                                Toast.makeText(MainActivityGame.this,"敌方使用"+opponent_hand.get(i).getName(),Toast.LENGTH_SHORT).show();
+                                Use_Card(board,opponent_hand.get(i));
+                                opponent_hand.remove(i);
+                                isUseCard=true;
+                                break;
+                            }
                         }
-                        else if(opponent_hand.get(i).getType().equals("decoy")&&isSpyExist()!=-999){
-                            Toast.makeText(MainActivityGame.this,"敌方使用诱饵替换间谍",Toast.LENGTH_SHORT).show();
-                            opponent_hand.remove(i);
-                            if(isSpyExist()==-1){
-                                for(int j=0;j<board.oppeonent_first_list.size();j++){
-                                    if(board.oppeonent_first_list.get(j).getType().equals("spy")&&!board.oppeonent_first_list.get(j).getisHero()){
-                                        board.oppeonent_first_list.get(j).setCol(board.oppeonent_first_list.get(j).getCol()*(-1));
-                                        opponent_hand.add(board.oppeonent_first_list.get(j));
-                                        board.oppeonent_first_list.remove(j);
-                                        board.oppeonent_first_list.add(decoy);
-                                        break;
+                        if(isUseCard) break;
+                        for(int i=0;i<opponent_hand.size();i++){
+                            if(opponent_hand.get(i).getType().equals("decoy")&&isSpyExist()!=-999){
+                                Toast.makeText(MainActivityGame.this,"敌方使用诱饵替换间谍",Toast.LENGTH_SHORT).show();
+                                opponent_hand.remove(i);
+                                if(isSpyExist()==-1){
+                                    for(int j=0;j<board.oppeonent_first_list.size();j++){
+                                        if(board.oppeonent_first_list.get(j).getType().equals("spy")&&!board.oppeonent_first_list.get(j).getisHero()){
+                                            board.oppeonent_first_list.get(j).setCol(board.oppeonent_first_list.get(j).getCol()*(-1));
+                                            opponent_hand.add(board.oppeonent_first_list.get(j));
+                                            board.oppeonent_first_list.remove(j);
+                                            board.oppeonent_first_list.add(decoy);
+                                            break;
+                                        }
                                     }
                                 }
+                                else{
+                                    for(int j=0;j<board.opponent_third_list.size();j++){
+                                        if(board.opponent_third_list.get(j).getType().equals("spy")&&!board.opponent_third_list.get(j).getisHero()){
+                                            board.opponent_third_list.get(j).setCol(board.opponent_third_list.get(j).getCol()*(-1));
+                                            opponent_hand.add(board.opponent_third_list.get(j));
+                                            board.opponent_third_list.remove(j);
+                                            board.opponent_third_list.add(decoy);
+                                            break;
+                                        }
+                                    }
+                                }
+                                isUseCard=true;
+                                break;
+                            }
+                        }
+                        if(isUseCard) break;
+                        for(int i=0;i<opponent_hand.size();i++){
+                            if(opponent_hand.get(i).getType().equals("doctor")&&opponent_dust.size()>=6){
+                                board.AddCard(-2,opponent_hand.get(i));
+                                opponent_hand.remove(i);
+                                boolean flag=false;
+                                for(int j=0;j<opponent_dust.size();j++){
+                                    if(opponent_dust.get(j).getType().equals("spy")){
+                                        opponent_dust.get(j).setCol(opponent_dust.get(j).getCol()*(-1));
+                                        Use_Card(board,opponent_dust.get(j));
+                                        opponent_dust.remove(j);
+                                        flag=true;
+                                    }
+                                }
+                                if(!flag){
+                                    int max=0;
+                                    for(int j=0;j<opponent_dust.size();j++){
+                                        if(opponent_dust.get(j).getPower()>max&&!opponent_dust.get(j).getisHero()){
+                                            max=opponent_dust.get(j).getPower();
+                                        }
+                                    }
+                                    for(int j=0;j<opponent_dust.size();j++){
+                                        if(opponent_dust.get(j).getPower()==max&&!opponent_dust.get(j).getisHero()){
+                                            board.AddCard(opponent_dust.get(j).getCol(),opponent_dust.get(j));
+                                            break;
+                                        }
+                                    }
+                                }
+                                isUseCard=true;
+                                break;
+                            }
+                        }
+                        if(isUseCard) break;
+                        for(int i=0;i<opponent_hand.size();i++){
+                            if(opponent_hand.get(i).getType().equals("fire")&&board.my_first_power>=30){
+                                Use_Card(board,opponent_hand.get(i));
+                                opponent_hand.remove(i);
+                                isUseCard=true;
+                                break;
+                            }
+                        }
+                        if(isUseCard) break;
+                        //set human horn
+                        if(board.opponent_first_power>40&&!board.opponent_first_special_card){
+                            for(int i=0;i<opponent_hand.size();i++){
+                                if(opponent_hand.get(i).getType().equals("commander_horn")){
+                                    Use_Card(board,opponent_hand.get(i));
+                                    opponent_hand.remove(i);
+                                    isUseCard=true;
+                                    break;
+                                }
+                            }
+                            if(isUseCard) break;
+                        }
+                        if(board.my_first_power+board.my_second_power+board.my_third_power>board.opponent_first_power+board.opponent_second_power+board.opponent_third_power+30){
+                            for(int i=0;i<opponent_hand.size();i++){
+                                if(opponent_hand.get(i).getType().equals("set")){
+                                    Use_Card(board,opponent_hand.get(i));
+                                    isUseCard=true;
+                                    break;
+                                }
+                            }
+                            if(isUseCard) break;
+                        }
+                        else {
+                            for(int i=0;i<opponent_hand.size();i++){
+                                if(opponent_hand.get(i).getType().equals("human")){
+                                    Use_Card(board,opponent_hand.get(i));
+                                    opponent_hand.remove(i);
+                                    isUseCard=true;
+                                    break;
+                                }
+                            }
+                            if(isUseCard) break;
+                        }
+                        for(int i=0;i<opponent_hand.size();i++){
+                            if(opponent_hand.get(i).getType().equals("set")){
+                                Use_Card(board,opponent_hand.get(i));
+                                isUseCard=true;
+                                break;
                             }
                             else{
-                                for(int j=0;j<board.opponent_third_list.size();j++){
-                                    if(board.opponent_third_list.get(j).getType().equals("spy")&&!board.opponent_third_list.get(j).getisHero()){
-                                        board.opponent_third_list.get(j).setCol(board.opponent_third_list.get(j).getCol()*(-1));
-                                        opponent_hand.add(board.opponent_third_list.get(j));
-                                        board.opponent_third_list.remove(j);
-                                        board.opponent_third_list.add(decoy);
-                                        break;
-                                    }
-                                }
+                                Use_Card(board,opponent_hand.get(i));
+                                opponent_hand.remove(i);
+                                isUseCard=true;
+                                break;
                             }
-                            isUseCard=true;
-                            break;
                         }
-                        else if(opponent_hand.get(i).getType().equals("doctor")&&opponent_dust.size()>=6){
-                            board.AddCard(-2,opponent_hand.get(i));
-                            opponent_hand.remove(i);
-                            boolean flag=false;
-                            for(int j=0;j<opponent_dust.size();j++){
-                                if(opponent_dust.get(j).getType().equals("spy")){
-                                    opponent_dust.get(j).setCol(opponent_dust.get(j).getCol()*(-1));
-                                    Use_Card(board,opponent_dust.get(j));
-                                    opponent_dust.remove(j);
-                                    flag=true;
-                                }
-                            }
-                            if(!flag){
-                                int max=0;
-                                for(int j=0;j<opponent_dust.size();j++){
-                                    if(opponent_dust.get(j).getPower()>max&&!opponent_dust.get(j).getisHero()){
-                                        max=opponent_dust.get(j).getPower();
-                                    }
-                                }
-                                for(int j=0;j<opponent_dust.size();j++){
-                                    if(opponent_dust.get(j).getPower()==max&&!opponent_dust.get(j).getisHero()){
-                                        board.AddCard(opponent_dust.get(j).getCol(),opponent_dust.get(j));
-                                        break;
-                                    }
-                                }
-                            }
-                            isUseCard=true;
-                            break;
-                        }
-                        else if(opponent_hand.get(i).getType().equals("fire")&&board.my_first_power>=30){
-                            Use_Card(board,opponent_hand.get(i));
-                            opponent_hand.remove(i);
-                            isUseCard=true;
-                            break;
-                        }
-                        else if(opponent_hand.get(i).getType().equals("human")||opponent_hand.get(i).getType().equals("commander_horn")){
-                            Use_Card(board,opponent_hand.get(i));
-                            opponent_hand.remove(i);
-                            isUseCard=true;
-                            break;
-                        }
-                        else if(opponent_hand.get(i).getType().equals("set")){
-                            Use_Card(board,opponent_hand.get(i));
-                            isUseCard=true;
-                            break;
-                        }
+                        break;
                     }
                     turn*=-1;
                     if(!isUseCard) sendBroadcast(new Intent("opponent_game_end"));
@@ -896,5 +949,13 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
             }
         }
         return -999;
+    }
+    public void delay(int ms){
+        try{
+            Thread.currentThread();
+            Thread.sleep(ms);
+        } catch (InterruptedException e){
+            e.printStackTrace();
+        }
     }
 }
