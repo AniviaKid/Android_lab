@@ -84,6 +84,7 @@ public class Hand_and_Dust extends AppCompatActivity implements View.OnClickList
                 if(MainActivityGame.enabled){
                     AlertDialog.Builder talk=new AlertDialog.Builder(Hand_and_Dust.this);
                     talk.setTitle("是否选择使用"+MainActivityGame.my_hand.get(position).getName());
+                    talk.setMessage(MainActivityGame.my_hand.get(position).getProperty());
                     talk.setNegativeButton("取消", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {

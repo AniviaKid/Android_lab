@@ -14,7 +14,8 @@ public class GwentCard {
     private int col;//该张昆特牌所在列数，1/2/3->近战列/远程列/攻城列，0可以进入所有列，4可以进入1/2列
     private int id;//该种昆特牌的ID，同袍之情/种族召唤
     public boolean isDouble;//是否经过号角的翻倍
-    public GwentCard(Integer img,int power,String type,boolean isHero,int col,int id,String name){
+    String property;//卡牌属性
+    public GwentCard(Integer img,int power,String type,boolean isHero,int col,int id,String name,String property){
         this.img=img;
         this.power=power;
         this.now_power=power;
@@ -24,6 +25,7 @@ public class GwentCard {
         this.id=id;
         this.name=name;
         this.isDouble=false;
+        this.property=property;
     }
     public Integer getImg(){
         return this.img;
@@ -37,6 +39,7 @@ public class GwentCard {
     public boolean getisHero(){return this.isHero;}
     public int getCol(){return this.col;}
     public int getId(){return this.id;}
+    public String getProperty(){return this.property;}
     public String getName(){return this.name;}
     public void setCol(int col){
         this.col=col;

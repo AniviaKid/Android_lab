@@ -65,5 +65,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.mViewH
                 mListener.OnClick(v,getPosition());
             }
         }
+
+
     }
 }

@@ -13,10 +13,12 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.BounceInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +27,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.io.*;
 import java.util.Random;
+
+import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
 
 public class MainActivityGame extends AppCompatActivity implements View.OnClickListener,View.OnLongClickListener{
     public static List<GwentCard> my_library=new ArrayList<>();//我方卡组
@@ -73,7 +77,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
         Init_library();
         for(int i=0;i<my_library.size();i++){
             if(my_library.get(i).getType().equals("decoy")){
-                decoy=new GwentCard(my_library.get(i).getImg(),my_library.get(i).getPower(),my_library.get(i).getType(),my_library.get(i).getisHero(),my_library.get(i).getCol(),my_library.get(i).getId(),my_library.get(i).getName());
+                decoy=new GwentCard(my_library.get(i).getImg(),my_library.get(i).getPower(),my_library.get(i).getType(),my_library.get(i).getisHero(),my_library.get(i).getCol(),my_library.get(i).getId(),my_library.get(i).getName(),my_library.get(i).getProperty());
                 break;
             }
         }
@@ -104,7 +108,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
             for(int i=0;i<information.length;i++){
                 int power,col,num;
                 boolean isHero;
-                String type=new String(),power_tmp=new String(),name=new String();
+                String type=new String(),power_tmp=new String(),name=new String(),property=new String();
                 //power=information[i].charAt(0)-'0';
                 for(j=0;j<information[i].length();j++){
                     if(information[i].charAt(j)!=' ') power_tmp+=information[i].charAt(j);
@@ -128,11 +132,16 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 num=information[i].charAt(j)-'0';
                 j+=2;
                 for(;j<information[i].length();j++){
+                    if(information[i].charAt(j)==' ') break;
                     name+=information[i].charAt(j);
+                }
+                j++;
+                for(;j<information[i].length();j++){
+                    property+=information[i].charAt(j);
                 }
                 Log.i("name",name);
                 //Log.i("num",""+num);
-                GwentCard temp=new GwentCard(img1[i],power,type,isHero,col,i,name);
+                GwentCard temp=new GwentCard(img1[i],power,type,isHero,col,i,name,property);
                 for(int k=0;k<num;k++) my_library.add(temp);
             }
             //Toast.makeText(this,getString(inputStream),Toast.LENGTH_SHORT).show();
@@ -156,7 +165,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
             for(int i=0;i<information.length;i++){
                 int power,col,num,id;
                 boolean isHero;
-                String type=new String(),power_tmp=new String(),id_tmp=new String(),name=new String();
+                String type=new String(),power_tmp=new String(),id_tmp=new String(),name=new String(),property=new String();
                 for(j=0;j<information[i].length();j++){
                     if(information[i].charAt(j)!=' ') power_tmp+=information[i].charAt(j);
                     else break;
@@ -186,10 +195,15 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 Log.i("num",""+num);
                 j+=2;
                 for(;j<information[i].length();j++){
+                    if(information[i].charAt(j)==' ') break;
                     name+=information[i].charAt(j);
                 }
+                j++;
+                for(;j<information[i].length();j++){
+                    property+=information[i].charAt(j);
+                }
                 Log.i("name",name);
-                GwentCard temp=new GwentCard(img2[i],power,type,isHero,col,id,name);
+                GwentCard temp=new GwentCard(img2[i],power,type,isHero,col,id,name,property);
                 for(int k=0;k<num;k++) opponent_library.add(temp);
             }
         } catch (IOException e){
@@ -216,19 +230,28 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
         linearLayoutManager1.setOrientation(LinearLayoutManager.HORIZONTAL);//设置每个View横向布置
         board.opponent_third=(RecyclerView) findViewById(R.id.opponent_third);
         board.opponent_third.setLayoutManager(linearLayoutManager1);
-        board.opponent_third.setAdapter(board.opponent_third_adapter);
+        //board.opponent_third.setAdapter(board.opponent_third_adapter);
+        AlphaInAnimationAdapter alphaInAnimationAdapter1=new AlphaInAnimationAdapter(board.opponent_third_adapter);
+        alphaInAnimationAdapter1.setInterpolator(new OvershootInterpolator());
+        board.opponent_third.setAdapter(alphaInAnimationAdapter1);
 
         LinearLayoutManager linearLayoutManager2=new LinearLayoutManager(this);
         linearLayoutManager2.setOrientation(LinearLayoutManager.HORIZONTAL);
         board.opponent_second=(RecyclerView) findViewById(R.id.opponent_second);
         board.opponent_second.setLayoutManager(linearLayoutManager2);
-        board.opponent_second.setAdapter(board.opponent_second_adapter);
+        //board.opponent_second.setAdapter(board.opponent_second_adapter);
+        AlphaInAnimationAdapter alphaInAnimationAdapter2=new AlphaInAnimationAdapter(board.opponent_second_adapter);
+        alphaInAnimationAdapter2.setInterpolator(new OvershootInterpolator());
+        board.opponent_second.setAdapter(alphaInAnimationAdapter2);
 
         LinearLayoutManager linearLayoutManager3=new LinearLayoutManager(this);
         linearLayoutManager3.setOrientation(LinearLayoutManager.HORIZONTAL);
         board.opponent_first=(RecyclerView) findViewById(R.id.opponent_first);
         board.opponent_first.setLayoutManager(linearLayoutManager3);
-        board.opponent_first.setAdapter(board.opponent_first_adapter);
+        //board.opponent_first.setAdapter(board.opponent_first_adapter);
+        AlphaInAnimationAdapter alphaInAnimationAdapter3=new AlphaInAnimationAdapter(board.opponent_first_adapter);
+        alphaInAnimationAdapter3.setInterpolator(new OvershootInterpolator());
+        board.opponent_first.setAdapter(alphaInAnimationAdapter3);
 
         LinearLayoutManager linearLayoutManager4=new LinearLayoutManager(this);
         linearLayoutManager4.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -249,7 +272,10 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 }
             }
         });
-        board.my_first.setAdapter(board.my_first_adapter);
+        //board.my_first.setAdapter(board.my_first_adapter);
+        AlphaInAnimationAdapter alphaInAnimationAdapter4=new AlphaInAnimationAdapter(board.my_first_adapter);
+        alphaInAnimationAdapter4.setInterpolator(new OvershootInterpolator());
+        board.my_first.setAdapter(alphaInAnimationAdapter4);
 
         LinearLayoutManager linearLayoutManager5=new LinearLayoutManager(this);
         linearLayoutManager5.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -270,7 +296,10 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 }
             }
         });
-        board.my_second.setAdapter(board.my_second_adapter);
+        //board.my_second.setAdapter(board.my_second_adapter);
+        AlphaInAnimationAdapter alphaInAnimationAdapter5=new AlphaInAnimationAdapter(board.my_second_adapter);
+        alphaInAnimationAdapter5.setInterpolator(new OvershootInterpolator());
+        board.my_second.setAdapter(alphaInAnimationAdapter5);
 
         LinearLayoutManager linearLayoutManager6=new LinearLayoutManager(this);
         linearLayoutManager6.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -291,7 +320,10 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 }
             }
         });
-        board.my_third.setAdapter(board.my_third_adapter);
+        //board.my_third.setAdapter(board.my_third_adapter);
+        AlphaInAnimationAdapter alphaInAnimationAdapter6=new AlphaInAnimationAdapter(board.my_third_adapter);
+        alphaInAnimationAdapter6.setInterpolator(new OvershootInterpolator());
+        board.my_third.setAdapter(alphaInAnimationAdapter6);
     }
     public static String getString(InputStream inputStream) throws IOException { //读取文件转为String
         InputStreamReader inputStreamReader=null;

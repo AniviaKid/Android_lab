@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
+
 import java.lang.reflect.GenericArrayType;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,27 +81,33 @@ public class GwentBoard {
     public void AddCard(int pos,GwentCard card){//向牌局上增加卡牌，输入pos与card，pos：1-3为己方，依次为近战列、远程列、攻城列；-1~-3为敌方
         if(pos==1){//己方近战列增加卡牌
             this.my_first_list.add(card);
-            this.my_first_adapter.notifyDataSetChanged();
+            //this.my_first_adapter.notifyDataSetChanged();
+            this.my_first_adapter.notifyItemInserted(my_first_list.size()-1);
         }
         else if(pos==2){//己方远程列增加卡牌
             this.my_second_list.add(card);
             this.my_second_adapter.notifyDataSetChanged();
+            //this.my_second_adapter.notifyItemInserted(my_second_list.size()-1);
         }
         else if(pos==3){//己方攻城列增加卡牌
             this.my_third_list.add(card);
-            this.my_third_adapter.notifyDataSetChanged();
+            //this.my_third_adapter.notifyDataSetChanged();
+            this.my_third_adapter.notifyItemInserted(my_third_list.size()-1);
         }
         else if(pos==-1){//敌方近战列增加卡牌
             this.oppeonent_first_list.add(card);
-            this.opponent_first_adapter.notifyDataSetChanged();
+            //this.opponent_first_adapter.notifyDataSetChanged();
+            this.opponent_first_adapter.notifyItemInserted(oppeonent_first_list.size()-1);
         }
         else if(pos==-2){//敌方远程列增加卡牌
             this.opponent_second_list.add(card);
-            this.my_second_adapter.notifyDataSetChanged();
+            //this.my_second_adapter.notifyDataSetChanged();
+            this.opponent_second_adapter.notifyItemInserted(opponent_second_list.size()-1);
         }
         else if(pos==-3){//敌方攻城列增加卡牌
             this.opponent_third_list.add(card);
-            this.opponent_third_adapter.notifyDataSetChanged();
+            //this.opponent_third_adapter.notifyDataSetChanged();
+            this.opponent_third_adapter.notifyItemInserted(opponent_third_list.size()-1);
         }
     }
     public void clear(){
