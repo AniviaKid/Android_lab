@@ -55,7 +55,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_game);
 
         findViewById(R.id.to_hand_dust).setOnClickListener(MainActivityGame.this);
         findViewById(R.id.give_up).setOnLongClickListener(MainActivityGame.this);
@@ -124,7 +124,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 //Log.i("type",type);
                 j++;
                 isHero=information[i].charAt(j)=='1' ? true : false;
-                Log.i("ishero",isHero+"");
+                //Log.i("ishero",isHero+"");
                 j+=2;
                 col=information[i].charAt(j)-'0';
                 //Log.i("col",""+col);
@@ -139,7 +139,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 for(;j<information[i].length();j++){
                     property+=information[i].charAt(j);
                 }
-                Log.i("name",name);
+                //Log.i("name",name);
                 //Log.i("num",""+num);
                 GwentCard temp=new GwentCard(img1[i],power,type,isHero,col,i,name,property);
                 for(int k=0;k<num;k++) my_library.add(temp);
@@ -172,27 +172,27 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 }
                 j++;
                 power=Integer.valueOf(power_tmp).intValue();
-                Log.i("power",""+power);
+                //Log.i("power",""+power);
                 for(;j<information[i].length();j++){
                     if(information[i].charAt(j)!=' ') type+=information[i].charAt(j);
                     else break;
                 }
-                Log.i("type",type);
+                //Log.i("type",type);
                 j++;
                 isHero=information[i].charAt(j)=='1' ? true : false;
                 j+=2;
                 col=information[i].charAt(j)-'0';col*=-1;
-                Log.i("col",""+col);
+                //Log.i("col",""+col);
                 j+=2;
                 for(;j<information[i].length();j++){
                     if(information[i].charAt(j)!=' ') id_tmp+=information[i].charAt(j);
                     else break;
                 }
                 id=Integer.valueOf(id_tmp).intValue();
-                Log.i("id",""+id);
+                //Log.i("id",""+id);
                 j++;
                 num=information[i].charAt(j)-'0';
-                Log.i("num",""+num);
+                //Log.i("num",""+num);
                 j+=2;
                 for(;j<information[i].length();j++){
                     if(information[i].charAt(j)==' ') break;
@@ -202,7 +202,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 for(;j<information[i].length();j++){
                     property+=information[i].charAt(j);
                 }
-                Log.i("name",name);
+                //Log.i("name",name);
                 GwentCard temp=new GwentCard(img2[i],power,type,isHero,col,id,name,property);
                 for(int k=0;k<num;k++) opponent_library.add(temp);
             }
@@ -393,6 +393,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 for(int i=0;i<board.my_first_list.size();i++){
                     if(board.my_first_list.get(i).getType().equals("friends")&&board.my_first_list.get(i).getId()==card.getId()) board.my_first_list.get(i).now_power=board.my_first_list.get(i).getPower()*num;
                     if(board.my_first_list.get(i).isDouble) board.my_first_list.get(i).now_power*=2;
+                    Log.i(board.my_first_list.get(i).getName(),""+board.my_first_list.get(i).now_power);
                 }
             }
             else if(card.getCol()==2){
@@ -732,11 +733,12 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                                 opponent_hand.remove(i);
                                 boolean flag=false;
                                 for(int j=0;j<opponent_dust.size();j++){
-                                    if(opponent_dust.get(j).getType().equals("spy")){
+                                    if(opponent_dust.get(j).getType().equals("spy")&&!opponent_dust.get(j).getisHero()){
                                         opponent_dust.get(j).setCol(opponent_dust.get(j).getCol()*(-1));
                                         Use_Card(board,opponent_dust.get(j));
                                         opponent_dust.remove(j);
                                         flag=true;
+                                        break;
                                     }
                                 }
                                 if(!flag){
