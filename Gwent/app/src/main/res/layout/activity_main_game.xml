@@ -6,6 +6,12 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@mipmap/back_resized"
+            android:scaleType="fitXY"
+            />
         <android.support.v7.widget.RecyclerView
             android:id="@+id/opponent_third"
             android:layout_width="360dp"
@@ -17,7 +23,7 @@
             android:layout_height="wrap_content"
             android:text="0"
             android:textSize="28dp"
-            android:textColor="#000000"
+            android:textColor="#2F2F4F"
             android:layout_alignParentRight="true"
             android:layout_alignTop="@id/opponent_third"
             android:layout_marginTop="30dp"
@@ -36,7 +42,7 @@
             android:layout_height="wrap_content"
             android:text="0"
             android:textSize="28dp"
-            android:textColor="#000000"
+            android:textColor="#2F2F4F"
             android:layout_alignParentRight="true"
             android:layout_alignTop="@id/opponent_second"
             android:layout_marginTop="30dp"/>
@@ -53,10 +59,10 @@
             android:layout_height="wrap_content"
             android:text="0"
             android:textSize="28dp"
-            android:textColor="#000000"
-            android:layout_alignParentRight="true"
-            android:layout_alignTop="@id/opponent_first"
-            android:layout_marginTop="30dp"/>
+            android:textColor="#2F2F4F"
+            android:layout_marginTop="30dp"
+            android:layout_alignTop="@+id/opponent_first"
+            android:layout_alignParentRight="true" />
 
         <TextView
             android:id="@+id/to_hand_dust"
@@ -76,7 +82,7 @@
             android:layout_height="wrap_content"
             android:text="放弃本轮"
             android:textSize="28dp"
-            android:textColor="#000000"
+            android:textColor="#2F2F4F"
             android:layout_alignTop="@+id/to_hand_dust"
             android:layout_marginLeft="20dp"
             />
@@ -96,7 +102,7 @@
             android:layout_height="wrap_content"
             android:text="我方剩余生命：2"
             android:textSize="14dp"
-            android:textColor="#00ff00"
+            android:textColor="#38B0DE"
             android:layout_alignBottom="@id/to_hand_dust"
             android:layout_marginLeft="170dp"
             />
@@ -116,7 +122,7 @@
             android:layout_height="wrap_content"
             android:text="0"
             android:textSize="14dp"
-            android:textColor="#00ff00"
+            android:textColor="#38B0DE"
             android:layout_alignBottom="@+id/to_hand_dust"
             android:layout_marginLeft="300dp"
             />
@@ -134,10 +140,11 @@
             android:layout_height="wrap_content"
             android:text="0"
             android:textSize="28dp"
-            android:textColor="#000000"
+            android:textColor="#2F2F4F"
+            android:layout_marginTop="30dp"
+            android:layout_alignTop="@+id/my_third"
             android:layout_alignParentRight="true"
-            android:layout_alignTop="@id/my_third"
-            android:layout_marginTop="30dp"/>
+            android:layout_alignParentEnd="true" />
         <android.support.v7.widget.RecyclerView
             android:id="@+id/my_second"
             android:layout_width="360dp"
@@ -151,7 +158,7 @@
             android:layout_height="wrap_content"
             android:text="0"
             android:textSize="28dp"
-            android:textColor="#000000"
+            android:textColor="#2F2F4F"
             android:layout_alignParentRight="true"
             android:layout_alignTop="@id/my_second"
             android:layout_marginTop="30dp"
@@ -169,7 +176,7 @@
             android:layout_height="wrap_content"
             android:text="0"
             android:textSize="28dp"
-            android:textColor="#000000"
+            android:textColor="#2F2F4F"
             android:layout_alignParentRight="true"
             android:layout_alignTop="@id/my_first"
             android:layout_marginTop="30dp"/>

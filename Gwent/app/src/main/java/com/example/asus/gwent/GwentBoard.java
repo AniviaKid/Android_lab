@@ -2,6 +2,7 @@ package com.example.asus.gwent;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
@@ -141,6 +142,12 @@ public class GwentBoard {
         this.opponent_first_adapter.notifyDataSetChanged();
         this.opponent_second_adapter.notifyDataSetChanged();
         this.opponent_third_adapter.notifyDataSetChanged();
+        opponent_first_special_card=false;
+        opponent_second_special_card=false;
+        opponent_third_special_card=false;
+        my_first_special_card=false;
+        my_second_special_card=false;
+        my_third_special_card=false;
     }
    public void Update(){
        //根据号角更新
@@ -149,6 +156,7 @@ public class GwentBoard {
                if(!my_first_list.get(i).getisHero()&&!my_first_list.get(i).isDouble){
                    my_first_list.get(i).now_power*=2;
                    my_first_list.get(i).isDouble=true;
+                   Log.i("update","1");
                }
            }
        }
@@ -157,6 +165,7 @@ public class GwentBoard {
                if(!my_second_list.get(i).getisHero()&&!my_second_list.get(i).isDouble){
                    my_second_list.get(i).now_power*=2;
                    my_second_list.get(i).isDouble=true;
+                   Log.i("update","2");
                }
            }
        }
@@ -165,6 +174,7 @@ public class GwentBoard {
                if(!my_third_list.get(i).getisHero()&&!my_third_list.get(i).isDouble){
                    my_third_list.get(i).now_power*=2;
                    my_third_list.get(i).isDouble=true;
+                   Log.i("update","3");
                }
            }
        }

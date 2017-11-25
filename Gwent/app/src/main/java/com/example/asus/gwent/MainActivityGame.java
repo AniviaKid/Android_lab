@@ -392,7 +392,11 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 if(num!=1) Toast.makeText(MainActivityGame.this,card.getName()+"发动同袍之情，点数倍增",Toast.LENGTH_SHORT).show();
                 for(int i=0;i<board.my_first_list.size();i++){
                     if(board.my_first_list.get(i).getType().equals("friends")&&board.my_first_list.get(i).getId()==card.getId()) board.my_first_list.get(i).now_power=board.my_first_list.get(i).getPower()*num;
-                    if(board.my_first_list.get(i).isDouble) board.my_first_list.get(i).now_power*=2;
+                    if(!board.my_first_list.get(i).isDouble&&board.my_first_special_card){
+                        board.my_first_list.get(i).now_power*=2;
+                        board.my_first_list.get(i).isDouble=true;
+                    }
+                    else if(board.my_first_list.get(i).isDouble) board.my_first_list.get(i).now_power*=2;//应该被号角加倍
                     Log.i(board.my_first_list.get(i).getName(),""+board.my_first_list.get(i).now_power);
                 }
             }
@@ -404,7 +408,12 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 if(num!=1) Toast.makeText(MainActivityGame.this,card.getName()+"发动同袍之情，点数倍增",Toast.LENGTH_SHORT).show();
                 for(int i=0;i<board.my_second_list.size();i++){
                     if(board.my_second_list.get(i).getType().equals("friends")&&board.my_second_list.get(i).getId()==card.getId()) board.my_second_list.get(i).now_power=board.my_second_list.get(i).getPower()*num;
-                    if(board.my_second_list.get(i).isDouble) board.my_second_list.get(i).now_power*=2;
+                    if(!board.my_second_list.get(i).isDouble&&board.my_second_special_card){
+                        board.my_second_list.get(i).now_power*=2;
+                        board.my_second_list.get(i).isDouble=true;
+                        Log.i("同袍2","倍增");
+                    }
+                    else if(board.my_second_list.get(i).isDouble) board.my_second_list.get(i).now_power*=2;
                 }
             }
             else if(card.getCol()==3){
@@ -415,7 +424,12 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                 if(num!=1) Toast.makeText(MainActivityGame.this,card.getName()+"发动同袍之情，点数倍增",Toast.LENGTH_SHORT).show();
                 for(int i=0;i<board.my_third_list.size();i++){
                     if(board.my_third_list.get(i).getType().equals("friends")&&board.my_third_list.get(i).getId()==card.getId()) board.my_third_list.get(i).now_power=board.my_third_list.get(i).getPower()*num;
-                    if(board.my_third_list.get(i).isDouble) board.my_third_list.get(i).now_power*=2;
+                    if(!board.my_third_list.get(i).isDouble&&board.my_third_special_card) {
+                        board.my_third_list.get(i).now_power*=2;
+                        board.my_third_list.get(i).isDouble=true;
+                        Log.i("同袍3","倍增");
+                    }
+                    else if(board.my_third_list.get(i).isDouble) board.my_third_list.get(i).now_power*=2;
                 }
             }
         }
@@ -527,7 +541,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                             if(!board.my_first_special_card){ //该列未使用号角
                                 board.AddCard(1,card);
                                 for(int i=0;i<board.my_first_list.size();i++){
-                                    if(!board.my_first_list.get(i).getisHero()){
+                                    if(!board.my_first_list.get(i).getisHero()&&!board.my_first_list.get(i).isDouble){
                                         board.my_first_list.get(i).isDouble=true;
                                         board.my_first_list.get(i).now_power*=2;
                                     }
@@ -544,7 +558,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                             if(!board.my_second_special_card){
                                 board.AddCard(2,card);
                                 for(int i=0;i<board.my_second_list.size();i++){
-                                    if(!board.my_second_list.get(i).getisHero()) {
+                                    if(!board.my_second_list.get(i).getisHero()&&!board.my_second_list.get(i).isDouble) {
                                         board.my_second_list.get(i).isDouble=true;
                                         board.my_second_list.get(i).now_power*=2;
                                     }
@@ -561,7 +575,7 @@ public class MainActivityGame extends AppCompatActivity implements View.OnClickL
                             if(!board.my_third_special_card){
                                 board.AddCard(3,card);
                                 for(int i=0;i<board.my_third_list.size();i++){
-                                    if(!board.my_third_list.get(i).getisHero()) {
+                                    if(!board.my_third_list.get(i).getisHero()&&!board.my_third_list.get(i).isDouble) {
                                         board.my_third_list.get(i).isDouble=true;
                                         board.my_third_list.get(i).now_power*=2;
                                     }
