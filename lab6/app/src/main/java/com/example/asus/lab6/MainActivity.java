@@ -54,6 +54,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+    }
+    @Override
+    protected void onStart(){
+        super.onStart();
         instance=MainActivity.this;
         findViewById(R.id.play).setOnClickListener(this);
         findViewById(R.id.stop).setOnClickListener(this);
@@ -119,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(v.getId()==R.id.play) {
             Button button=(Button) findViewById(R.id.play);
             TextView status=(TextView) findViewById(R.id.status);
-            if(!isPlaying){ //要切换到-1，即暂停
+            if(!isPlaying){
                 button.setText("PAUSE");
                 status.setText("Playing");
                 animator=ObjectAnimator.ofFloat(imageView,"rotation",degree,360+degree);
@@ -159,11 +163,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
         else if(v.getId()==R.id.quit){
-            try{
-                myBinder.onTransact(103,Parcel.obtain(),Parcel.obtain(),0);
-            } catch (RemoteException e){
-                e.printStackTrace();
-            }
+            unbindService(sc);
+            sc=null;
+            MainActivity.this.finish();
+            System.exit(0);
         }
     }
     Thread thread=new Thread(){
@@ -175,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } catch (InterruptedException e){
                     e.printStackTrace();
                 }
-                if(sc!=null&&isPlaying&&!isProcessChange){
+                if(isPlaying&&!isProcessChange){
                     mHandler.obtainMessage(101).sendToTarget();
                 }
             }
@@ -186,6 +189,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void handleMessage(Message msg){
             super.handleMessage(msg);
             if(msg.what==101){
+                seekBar.setMax(MyService.mediaPlayer.getDuration());
                 int now_time=MyService.mediaPlayer.getCurrentPosition();
                 MainActivity.seekBar.setProgress(now_time);
                 int now_second=now_time/1000,now_min=0;
@@ -199,7 +203,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
-    public void Init_Animator(){
-
-    }
+   @Override
+    public void onBackPressed(){
+       moveTaskToBack(false);
+   }
 }

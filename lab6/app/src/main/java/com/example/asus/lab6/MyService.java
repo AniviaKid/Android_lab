@@ -92,7 +92,7 @@ public class MyService extends Service {
             }
             else if(code==103){ //退出按钮，service
                 Log.i("退出","103");
-                MainActivity.instance.finish();
+                System.exit(0);
                 //Toast.makeText(MyService.this,"退出",Toast.LENGTH_SHORT).show();
             }
             else if(code==104){ //停止拖动进度条
