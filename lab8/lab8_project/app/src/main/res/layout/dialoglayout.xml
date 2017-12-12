@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="姓名:"
+            android:textSize="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp"
+            />
+        <TextView
+            android:id="@+id/name_edit"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:text="吴彦祖"
+            android:textSize="20dp"
+            android:layout_alignLeft="@id/name"
+            android:layout_marginLeft="48dp"
+            android:layout_alignTop="@id/name"
+            />
+        <TextView
+            android:id="@+id/birthday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="生日:"
+            android:textSize="20dp"
+            android:layout_alignLeft="@id/name"
+            android:layout_marginTop="66dp"
+            />
+        <EditText
+            android:id="@+id/birthday_edit"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/name_edit"
+            android:layout_marginTop="52dp"
+            />
+        <TextView
+            android:id="@+id/gift"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="礼物:"
+            android:textSize="20dp"
+            android:layout_alignLeft="@id/name"
+            android:layout_marginTop="112dp"
+            />
+        <EditText
+            android:id="@+id/gift_edit"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/name_edit"
+            android:layout_marginTop="98dp"
+            />
+        <TextView
+            android:id="@+id/phone_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="电话: 1111111"
+            android:textSize="20dp"
+            android:layout_alignLeft="@id/name"
+            android:layout_marginTop="158dp"
+            android:textColor="#00FF00"
+            />
+
+    </RelativeLayout>
+
+</LinearLayout>
