@@ -68,8 +68,8 @@ public class ReponseActivity extends AppCompatActivity implements View.OnClickLi
                         for(int i=0;i<githubs.size();i++){
                             Map<String,String> tmp=new HashMap<>();
                             tmp.put("name",githubs.get(i).getName());
-                            tmp.put("id_or_language",githubs.get(i).getLanguage());
-                            tmp.put("blog_or_description",githubs.get(i).getDescription());
+                            tmp.put("id_or_language",githubs.get(i).getLanguage()==null ? "无" : githubs.get(i).getLanguage());
+                            tmp.put("blog_or_description",githubs.get(i).getDescription()==null ? "无" : githubs.get(i).getDescription());
                             list.add(tmp);
                         }
                         //recyclerAdapter.notifyDataSetChanged();

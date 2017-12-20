@@ -34,6 +34,8 @@
             android:text="blog:https://github.com/AniviaKid"
             android:layout_alignLeft="@id/id_or_language"
             android:layout_marginTop="48dp"
+            android:maxLines="1"
+            android:ellipsize="end"
             />
     </RelativeLayout>
 
